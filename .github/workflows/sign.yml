@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  build-and-sign:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,11 +23,62 @@ jobs:
       - name: build
         run: dotnet build src --configuration Release --restore
 
-      - name: publish
-        run: dotnet publish src --configuration Release --no-build -o ./artifacts
+      - name: package
+        run: dotnet pack src --configuration Release --no-build -o ./artifacts
 
       - name: artifact
         uses: actions/upload-artifact@v5
         with:
           name: AcmeLibrary
+          path: artifacts
+
+  sign:
+    needs: build
+
+    permissions:
+      id-token: write
+
+    environment: production
+
+    runs-on: windows-latest
+
+    steps:
+      - name: setup dotnet
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: setup dotnet sign tool
+        run: dotnet tool install --tool-path . --prerelease sign
+
+      - name: download artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: AcmeLibrary
+          path: artifacts
+
+      - name: azure login
+        uses: azure/login@v2
+        with:
+          allow-no-subscriptions: true
+          client-id: ${{ secrets.KEYVAULT_CLIENT_ID }}
+          tenant-id: ${{ secrets.KEYVAULT_TENANT_ID }}
+
+      - name: sign package
+        shell: pwsh
+        run: >
+          ./sign code trusted-signing
+          **/*.nupkg
+          --base-directory "${{ github.workspace }}/artifacts"
+          --publisher-name "NetOffice Acme Sample"
+          --description "Sample workflow to sign using Azure Trusted Signing service."
+          --description-url "https://github.com/NetOfficeFw/trusted-signing/"
+          --trusted-signing-endpoint "${{ secrets.TRUSTED_SIGNING_ENDPOINT }}"
+          --trusted-signing-account "${{ secrets.TRUSTED_SIGNING_ACCOUNT }}"
+          --trusted-signing-certificate-profile "${{ secrets.TRUSTED_SIGNING_PROFILE }}"
+
+      - name: artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: AcmeLibrary-signed
           path: artifacts
