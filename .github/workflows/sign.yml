@@ -21,7 +21,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: build
-        run: dotnet build src --configuration Release --no-restore
+        run: dotnet build src --configuration Release --restore
 
       - name: publish
         run: dotnet publish src --configuration Release --no-build -o ./artifacts
