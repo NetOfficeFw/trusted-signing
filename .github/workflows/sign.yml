@@ -60,7 +60,7 @@ jobs:
       - name: azure login
         uses: azure/login@v2
         with:
-          subscription: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           client-id: ${{ secrets.KEYVAULT_CLIENT_ID }}
           tenant-id: ${{ secrets.KEYVAULT_TENANT_ID }}
 
