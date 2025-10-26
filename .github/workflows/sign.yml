@@ -85,7 +85,7 @@ jobs:
         shell: pwsh
         run: |
           $nupkg = Get-ChildItem -Path '${{ github.workspace }}\artifacts' -Filter '*.nupkg' | Select-Object -First 1
-          nuget-cert-extractor --file $nupkg --output certificates --code-signing --author --leaf
+          ./nuget-cert-extractor --file $nupkg --output certificates --code-signing --author --leaf
 
       - name: artifact
         uses: actions/upload-artifact@v5
