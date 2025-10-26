@@ -84,7 +84,7 @@ jobs:
       - name: extract certificate
         shell: pwsh
         run: |
-          $nupkg = Get-ChildItem -Path '${{ inputs.working-directory }}\artifacts' -Filter '*.nupkg' | Select-Object -First 1
+          $nupkg = Get-ChildItem -Path '${{ github.workspace }}\artifacts' -Filter '*.nupkg' | Select-Object -First 1
           nuget-cert-extractor --file $nupkg --output certificates --code-signing --author --leaf
 
       - name: artifact
