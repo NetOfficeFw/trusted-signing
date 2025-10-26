@@ -48,9 +48,10 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: setup dotnet sign tool
-        run: dotnet tool install --tool-path . --prerelease sign
-
+      - name: setup dotnet tools
+        run: |
+          dotnet tool install --tool-path . --prerelease sign
+          dotnet tool install --tool-path . --version 0.1.1 Knapcode.CertificateExtractor
       - name: download artifact
         uses: actions/download-artifact@v5
         with:
@@ -80,8 +81,20 @@ jobs:
       - name: verify signature
         run: dotnet nuget verify "${{ github.workspace }}\artifacts\*.nupkg"
 
+      - name: extract certificate
+        shell: pwsh
+        run: |
+          $nupkg = Get-ChildItem -Path '${{ inputs.working-directory }}\artifacts' -Filter '*.nupkg' | Select-Object -First 1
+          nuget-cert-extractor --file $nupkg --output certificates --code-signing --author --leaf
+
       - name: artifact
         uses: actions/upload-artifact@v5
         with:
           name: AcmeLibrary-signed
           path: artifacts
+
+      - name: certificate artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: signing-certificate
+          path: certificates
