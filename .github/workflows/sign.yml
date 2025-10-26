@@ -78,7 +78,7 @@ jobs:
           --trusted-signing-certificate-profile "${{ secrets.TRUSTED_SIGNING_PROFILE }}"
 
       - name: verify signature
-        run: dotnet nuget verify ./artifacts/**.nupkg
+        run: dotnet nuget verify "${{ github.workspace }}/artifacts"
 
       - name: artifact
         uses: actions/upload-artifact@v5
